@@ -1,44 +1,36 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <unordered_set>
 using namespace std;
 
-const int INF = 9999;
-
-class Graph
-{
+class Graph {
     int V;
-    vector<vector<int>> adj;
+    vector<unordered_set<int>> adj;
 
 public:
-    Graph(int V) : V(V)
-    {
-        adj.resize(V, vector<int>(V, 0));
+    Graph(int V) : V(V) {
+        adj.resize(V);
     }
 
-    void addEdge(int u, int v)
-    {
-        adj[u][v] = 1;
-        adj[v][u] = 1;
+    void addEdge(int u, int v) {
+        adj[u].insert(v);
+        adj[v].insert(u);
     }
 
-    bool isSafe(int v, vector<int> &color, int c)
-    {
-        for (int i = 0; i < V; ++i)
-            if (adj[v][i] && c == color[i])
+    bool isSafe(int v, vector<int>& color, int c) {
+        for (int neighbor : adj[v]) {
+            if (color[neighbor] == c)
                 return false;
+        }
         return true;
     }
 
-    bool graphColoringUtil(vector<int> &color, int m, int v)
-    {
+    bool graphColoringUtil(vector<int>& color, int m, int v) {
         if (v == V)
             return true;
 
-        for (int c = 1; c <= m; ++c)
-        {
-            if (isSafe(v, color, c))
-            {
+        for (int c = 1; c <= m; ++c) {
+            if (isSafe(v, color, c)) {
                 color[v] = c;
                 if (graphColoringUtil(color, m, v + 1))
                     return true;
@@ -48,11 +40,9 @@ public:
         return false;
     }
 
-    bool graphColoring(int m)
-    {
+    bool graphColoring(int m) {
         vector<int> color(V, 0);
-        if (!graphColoringUtil(color, m, 0))
-        {
+        if (!graphColoringUtil(color, m, 0)) {
             cout << "Solution does not exist.";
             return false;
         }
@@ -64,8 +54,7 @@ public:
     }
 };
 
-int main()
-{
+int main() {
     int V = 4;
     Graph g(V);
     g.addEdge(0, 1);
