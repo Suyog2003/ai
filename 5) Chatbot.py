@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+
 from nltk.chat.util import Chat, reflections
 
 pairs = [
