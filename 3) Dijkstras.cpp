@@ -7,76 +7,75 @@ using namespace std;
 
 #define INF INT_MAX
 
-// Data structure to represent a graph edge
-struct Edge
+class Graph
 {
-    int dest, weight;
-};
+private:
+    int V; // Number of vertices
+    vector<vector<pair<int, int>>> adjList;
 
-// Data structure to represent a graph node
-struct Node
-{
-    int vertex, dist;
-};
-
-// Comparison function for priority queue
-struct compare
-{
-    bool operator()(const Node &a, const Node &b)
+public:
+    Graph(int V) : V(V)
     {
-        return a.dist > b.dist;
+        adjList.resize(V);
     }
-};
 
-// Function to perform Dijkstra's algorithm
-void dijkstra(vector<vector<Edge>> &graph, int source)
-{
-    int V = graph.size();
-    vector<int> dist(V, INF);
-    vector<bool> visited(V, false);
-
-    // Priority queue to store vertex-distance pairs
-    priority_queue<Node, vector<Node>, compare> pq;
-
-    // Add source vertex to the priority queue
-    pq.push({source, 0});
-    dist[source] = 0;
-
-    while (!pq.empty())
+    // Function to add an edge to the graph
+    void addEdge(int u, int v, int weight)
     {
-        int u = pq.top().vertex;
-        pq.pop();
+        adjList[u].push_back({v, weight});
+        // For undirected graph, uncomment the next line
+        // adjList[v].push_back({u, weight});
+    }
 
-        // If vertex u is already visited, skip
-        if (visited[u])
-            continue;
+    // Function to perform Dijkstra's algorithm
+    void dijkstra(int source)
+    {
+        vector<int> dist(V, INF);
+        vector<bool> visited(V, false);
 
-        // Mark vertex u as visited
-        visited[u] = true;
+        // Priority queue to store vertex-distance pairs
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
-        // Update the distance of all adjacent vertices of u
-        for (const Edge &e : graph[u])
+        // Add source vertex to the priority queue
+        pq.push({0, source});
+        dist[source] = 0;
+
+        while (!pq.empty())
         {
-            int v = e.dest;
-            int weight = e.weight;
-            if (!visited[v] && dist[u] != INF && dist[u] + weight < dist[v])
+            int u = pq.top().second;
+            pq.pop();
+
+            // If vertex u is already visited, skip
+            if (visited[u])
+                continue;
+
+            // Mark vertex u as visited
+            visited[u] = true;
+
+            // Update the distance of all adjacent vertices of u
+            for (const auto &edge : adjList[u])
             {
-                dist[v] = dist[u] + weight;
-                pq.push({v, dist[v]});
+                int v = edge.first;
+                int weight = edge.second;
+                if (!visited[v] && dist[u] != INF && dist[u] + weight < dist[v])
+                {
+                    dist[v] = dist[u] + weight;
+                    pq.push({dist[v], v});
+                }
             }
         }
-    }
 
-    // Print the shortest distances from the source vertex
-    cout << "Shortest distances from vertex " << source << ":\n";
-    for (int i = 0; i < V; ++i)
-    {
-        if (dist[i] == INF)
-            cout << i << ": INF\n";
-        else
-            cout << i << ": " << dist[i] << "\n";
+        // Print the shortest distances from the source vertex
+        cout << "Shortest distances from vertex " << source << ":\n";
+        for (int i = 0; i < V; ++i)
+        {
+            if (dist[i] == INF)
+                cout << i << ": INF\n";
+            else
+                cout << i << ": " << dist[i] << "\n";
+        }
     }
-}
+};
 
 int main()
 {
@@ -84,23 +83,21 @@ int main()
     cout << "Enter the number of vertices and edges: ";
     cin >> V >> E;
 
-    vector<vector<Edge>> graph(V);
+    Graph graph(V);
 
     cout << "Enter the edges and weights (source destination weight):\n";
     for (int i = 0; i < E; ++i)
     {
         int u, v, w;
         cin >> u >> v >> w;
-        graph[u].push_back({v, w});
-        // For undirected graph, uncomment the next line
-        // graph[v].push_back({u, w});
+        graph.addEdge(u, v, w);
     }
 
     int source;
     cout << "Enter the source vertex: ";
     cin >> source;
 
-    dijkstra(graph, source);
+    graph.dijkstra(source);
 
     return 0;
 }
